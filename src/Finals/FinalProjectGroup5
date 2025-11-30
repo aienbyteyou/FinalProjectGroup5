@@ -55,7 +55,7 @@ package Finals;
 
 import java.util.Scanner;
 
-public class LibraryManagementSystemG5 {
+public class FinalProjectGroup5 {
  
     // One shared Scanner for all user input
     static Scanner kbd = new Scanner(System.in);
