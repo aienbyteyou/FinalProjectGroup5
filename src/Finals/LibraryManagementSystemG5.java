@@ -4,8 +4,6 @@ import java.util.Scanner;
 
 public class LibraryManagementSystemG5 {
 
-    boomboom
-
     // One shared Scanner for all user input
     static Scanner kbd = new Scanner(System.in);
 
