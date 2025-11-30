@@ -1,3 +1,56 @@
+/* 
+Date: December 03, 2025
+Group Members: 
+1. Bungulan, Chaste
+2. Cimatu, Ernst
+3. Give, Aura Vienn 
+4. Javier, Chad 
+5. Manzano, Jay Archie
+6. Velasco, Brian
+7. Vidal, Giovanni
+
+Algorithm: 
+1. Start program.
+2. Initialize all books: for each category (4) and each book (10), set status = “Available” and clear borrower, access type, days, cost.
+3. Repeat until user chooses Exit:
+3.1. Show menu: Borrow, Return, Check Available, Search, Exit.
+3.2. Read user choice.
+3.3. If Borrow → go to step 4.
+3.4. If Return → go to step 5.
+3.5. If Check Available → go to step 6.
+3.6. If Search → go to step 7.
+3.7. If Exit → end loop.
+
+4. Borrow Book:
+4.1. Ask for category; if invalid, stop this operation.
+4.2. List only “Available” books in that category with new numbers.
+4.3. If none, stop this operation.
+4.4. Ask user to choose a listed book; validate.
+4.5. Ask for access type: Overnight, Multi-Day (ask days), or Monthly; compute cost.
+4.6. Ask for borrower name; if empty, stop.
+4.7. Confirm book still “Available”; if not, stop.
+4.8. Show summary; call payment.
+4.9. If payment fails, stop.
+4.10. If payment succeeds, set status = “Borrowed” and save borrower, access type, days, cost.
+
+5. Return Book:
+5.1. Ask for borrower name.
+5.2. Search all books for status “Borrowed” with that name.
+5.3. If not found, inform user.
+5.4. If found, show book, then reset that slot to “Available” and clear data.
+
+6. Check Available Books:
+6.1. Ask for category; validate.
+6.2. List all books in that category with status “Available”; if none, say so.
+
+7. Search Book:
+7.1. Ask for full/partial title.
+7.2. Search all books whose titles contain the term (case-insensitive).
+7.3. For each match, show title, category, and status (with borrower if borrowed).
+7.4. If no matches, say so.
+
+8. End program. */
+
 package Finals;
 
 import java.util.Scanner;
