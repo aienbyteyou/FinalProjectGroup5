@@ -1,7 +1,9 @@
 /*
 Project: Library Management System Simulation
-Date: December 03, 2025
-Group Members:
+Date: December 03, 2025, 9313, WS 8:30 - 10:30 AM (Laboratory) / 1:30 - 2:30 (Lecture)
+Instructor: Ma'am Janet V. Itliong
+
+Group 5 Members:
 1. Bungulan, Chaste
 2. Cimatu, Ernst
 3. Give, Aura Vienn
