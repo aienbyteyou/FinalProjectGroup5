@@ -1,9 +1,6 @@
 /*
-Project: Library Management System Simulation
-Date: December 03, 2025, 9313, WS 8:30 - 10:30 AM (Laboratory) / 1:30 - 2:30 (Lecture)
-Instructor: Ma'am Janet V. Itliong
-
-Group 5 Members:
+Date: December 03, 2025
+Group Members:
 1. Bungulan, Chaste
 2. Cimatu, Ernst
 3. Give, Aura Vienn
@@ -60,51 +57,45 @@ import java.util.Scanner;
 
 public class FinalProjectGroup5 {
 
-    // One shared Scanner for all user input
+    // Shared Scanner for all user keyboard input
     static Scanner kbd = new Scanner(System.in);
 
-    // List of categories. Index 0 = Fiction, 1 = Non-Fiction, etc.
+    // Book categories (row index in 2D arrays)
     static String[] categories = {"Fiction", "Non-Fiction", "Science", "History"};
 
-    // 2D array: [category][bookIndex]
-    // Each row corresponds to one category, each column to a specific book
+    // Book titles per category (4 categories x 10 books)
     static String[][] bookTitles = {
-            // Fiction (index 0)
             {"The Silent Library", "Starlight Kingdom", "Echoes of Tomorrow", "The Lost Cartographer",
                     "Moonlit Chronicles", "Forest of Whispers", "The Glass Voyager", "House of Falling Stars",
                     "A Tale of Two Voyagers", "The Ember Archive"},
-            // Non-Fiction (index 1)
             {"Age of AI", "A Brief History of Time", "Bio Ethics Today.", "Global Warming: The Facts",
                     "The Space Race Chronicle", "Art Theory and Practice", "Economics 101", "The Human Brain",
                     "Anatomy of the Body", "Practical Philosophy"},
-            // Science (index 2)
             {"Quantum Realities", "Astrobiology Frontier", "The Particle Puzzle", "Evolution of Life",
                     "Deep Ocean Mysteries", "Chemical Foundations", "Solar System Odyssey", "Applied Robotics",
                     "Introduction to Genetics", "Environmental Science Today"},
-            // History (index 3)
             {"Medieval Ages", "Ancient Civilizations", "The Roman Empire Legacy", "World War Chronicles",
                     "Rise of Nations", "The Silk Road Story", "History of Inventions", "The Age of Exploration",
                     "Revolutions That Shaped the World", "The Modern Century"}
     };
 
-    // These arrays store info for each [category][book]
+    // Parallel arrays to track status and borrowing details
     static String[][] status = new String[4][10];        // "Available" or "Borrowed"
-    static String[][] borrowerName = new String[4][10];  // who borrowed it
+    static String[][] borrowerName = new String[4][10];  // name of borrower
     static String[][] accessType = new String[4][10];    // "Overnight", "Multi-Day", or "Monthly"
-    static int[][] daysBorrowed = new int[4][10];        // only used for Multi-Day
-    static int[][] cost = new int[4][10];                // last rent cost for that book
+    static int[][] daysBorrowed = new int[4][10];        // number of days for Multi-Day
+    static int[][] cost = new int[4][10];                // last rent cost paid for that book
 
+    // Main method: shows menu and routes user to chosen operation
     public static void main(String[] args) {
 
-        // Set initial values for all books
-        initializeBooks();
+        initializeBooks();  // set all books to Available with cleared data
 
-        boolean running = true; // controls the main menu loop
+        boolean running = true;
 
-        // Main program loop – keeps showing menu until user chooses Exit
         while (running) {
             System.out.println();
-            System.out.println("Welcome to the City Library System");
+            System.out.println("=== City Library System ===");
             System.out.println("1. Borrow Book");
             System.out.println("2. Return Book");
             System.out.println("3. Check Available Books");
@@ -112,40 +103,40 @@ public class FinalProjectGroup5 {
             System.out.println("5. Exit");
             System.out.print("Enter your choice (1-5): ");
 
-            int choice = readInt(); // safe integer input
+            int choice = readInt();  // safe integer input with validation
 
-            // Decide what to do based on user choice
+            // validate main menu choice range
+            while (choice < 1 || choice > 5) {
+                System.out.print("Invalid choice. Please enter 1-5: ");
+                choice = readInt();
+            }
+
             switch (choice) {
                 case 1:
-                    borrowBook(); // handle borrowing flow
+                    borrowBook();        // handle borrowing flow
                     break;
                 case 2:
-                    returnBook(); // handle return flow
+                    returnBook();        // handle return flow
                     break;
                 case 3:
-                    checkAvailableBooks(); // show available books for one category
+                    checkAvailableBooks(); // show available books in a category
                     break;
                 case 4:
-                    searchBooks(); // search by name
+                    searchBooks();       // search books by title
                     break;
                 case 5:
                     System.out.println("Thank you for using the Library Management System. Goodbye!");
-                    running = false; // exit loop
+                    running = false;     // exit loop and end program
                     break;
-                default:
-                    System.out.println("Invalid choice. Please enter 1–5.");
             }
         }
 
-        // Good practice: close Scanner when done
-        kbd.close();
+        kbd.close();  // close Scanner when program ends
     }
 
-    // Initialize all book slots to default values
+    // initializeBooks: sets all book entries to default "Available" and clears borrower data
     static void initializeBooks() {
-        // Loop through each category
         for (int c = 0; c < 4; c++) {
-            // Loop through each book in that category
             for (int b = 0; b < 10; b++) {
                 status[c][b] = "Available";
                 borrowerName[c][b] = "";
@@ -156,65 +147,51 @@ public class FinalProjectGroup5 {
         }
     }
 
-    // ===================== BORROW BOOK =====================
-    // Full flow: pick category → pick book → pick access type → pay → update arrays
+    // borrowBook: lets user choose a category, pick an available book, choose access type, pay, then mark as borrowed
     static void borrowBook() {
 
         System.out.println();
         System.out.println("Select Book Category");
-        // Show numbered category list (1-based for user)
         for (int i = 0; i < categories.length; i++) {
             System.out.println((i + 1) + ". " + categories[i]);
         }
         System.out.print("Enter category number: ");
-
-        int categoryIndex = readInt() - 1; // convert 1–4 to 0–3
-
-        // Validate category index
-        if (categoryIndex < 0 || categoryIndex >= categories.length) {
-            System.out.println("Invalid category.");
-            return; // stop borrow process
+        int catChoice = readInt();
+        while (catChoice < 1 || catChoice > categories.length) {
+            System.out.print("Invalid category. Please enter 1-" + categories.length + ": ");
+            catChoice = readInt();
         }
+        int categoryIndex = catChoice - 1;
 
-        // Now show only the books that are currently Available in that category
         System.out.println();
         System.out.println("Available " + categories[categoryIndex] + " Books:");
 
-        // mapIndex will store the real array index of each displayed book
-        // Example: user sees 1,2,3 but maybe real indexes are 0,4,7
+        // mapIndex stores the real book index for each displayed number
         int[] mapIndex = new int[10];
-        int displayCount = 0; // how many books we actually showed
+        int displayCount = 0;
 
         for (int i = 0; i < 10; i++) {
-            // Check if this book is available
             if (status[categoryIndex][i].equals("Available")) {
                 displayCount++;
-                // store real index at position (displayCount - 1)
                 mapIndex[displayCount - 1] = i;
                 System.out.println(displayCount + ". " + bookTitles[categoryIndex][i]);
             }
         }
 
-        // If nothing was displayed, no books are available in this category
         if (displayCount == 0) {
             System.out.println("No available books in this category.");
             return;
         }
 
-        // Ask user which of the displayed books they want to borrow
         System.out.print("Enter book number to borrow (1-" + displayCount + "): ");
         int chosenDisplay = readInt();
-
-        // Validate display choice
-        if (chosenDisplay < 1 || chosenDisplay > displayCount) {
-            System.out.println("Invalid book number.");
-            return;
+        while (chosenDisplay < 1 || chosenDisplay > displayCount) {
+            System.out.print("Invalid book number. Enter 1-" + displayCount + ": ");
+            chosenDisplay = readInt();
         }
 
-        // Convert chosen display number back to the actual book index
         int bookIndex = mapIndex[chosenDisplay - 1];
 
-        // Ask for access type (rental plan)
         System.out.println();
         System.out.println("Choose Access Type");
         System.out.println("1. Overnight (₱50 flat rate)");
@@ -222,37 +199,32 @@ public class FinalProjectGroup5 {
         System.out.println("3. Monthly (₱1000 flat rate)");
         System.out.print("Enter access type number: ");
         int accessChoice = readInt();
-
-        String access;   // will store "Overnight", "Multi-Day", or "Monthly"
-        int totalCost = 0;
-        int days = 0;    // only used if Multi-Day
-
-        // Determine access type and cost
-        switch (accessChoice) {
-            case 1:
-                access = "Overnight";
-                totalCost = 50;
-                break;
-            case 2:
-                access = "Multi-Day";
-                System.out.print("Enter number of days: ");
-                days = readInt();
-                if (days <= 0) {
-                    System.out.println("Invalid number of days.");
-                    return;
-                }
-                totalCost = 100 * days; // 100 per day
-                break;
-            case 3:
-                access = "Monthly";
-                totalCost = 1000;
-                break;
-            default:
-                System.out.println("Invalid access type.");
-                return;
+        while (accessChoice < 1 || accessChoice > 3) {
+            System.out.print("Invalid type. Please enter 1-3: ");
+            accessChoice = readInt();
         }
 
-        // Get borrower name, must not be empty
+        String access;
+        int totalCost = 0;
+        int days = 0;
+
+        if (accessChoice == 1) {
+            access = "Overnight";
+            totalCost = 50;
+        } else if (accessChoice == 2) {
+            access = "Multi-Day";
+            System.out.print("Enter number of days: ");
+            days = readInt();
+            while (days <= 0) {
+                System.out.print("Please enter a positive number of days: ");
+                days = readInt();
+            }
+            totalCost = 100 * days;
+        } else {
+            access = "Monthly";
+            totalCost = 1000;
+        }
+
         System.out.print("Enter Borrower Name: ");
         String borrower = kbd.nextLine().trim();
         if (borrower.isEmpty()) {
@@ -260,13 +232,36 @@ public class FinalProjectGroup5 {
             return;
         }
 
-        // Safety check: ensure book is still available
+        // Block double-borrow of the same book by the same borrower
+        if (status[categoryIndex][bookIndex].equals("Borrowed") &&
+                borrowerName[categoryIndex][bookIndex].equalsIgnoreCase(borrower)) {
+            System.out.println("You already borrowed this book.");
+            return;
+        }
+
+        // Check if borrower already has other books (warning only)
+        boolean hasOther = false;
+        for (int c = 0; c < 4; c++) {
+            for (int b = 0; b < 10; b++) {
+                if (status[c][b].equals("Borrowed") &&
+                        borrowerName[c][b].equalsIgnoreCase(borrower)) {
+                    hasOther = true;
+                    break;
+                }
+            }
+            if (hasOther) break;
+        }
+        if (hasOther) {
+            System.out.println("Note: You already have other borrowed book(s).");
+        }
+
+        // Final availability check before confirming
         if (!status[categoryIndex][bookIndex].equals("Available")) {
             System.out.println("Sorry, that book is no longer available.");
             return;
         }
 
-        // Show a summary so user can confirm mentally before paying
+        // Show summary of the planned borrowing
         System.out.println();
         System.out.println("Borrowing Summary");
         System.out.println("Book: " + bookTitles[categoryIndex][bookIndex]);
@@ -281,7 +276,7 @@ public class FinalProjectGroup5 {
             System.out.println("Total Cost: ₱" + totalCost);
         }
 
-        // Call payment method. If this returns false, booking will not proceed.
+        // Process payment; only proceed if successful
         boolean paid = processPayment(totalCost);
 
         if (!paid) {
@@ -289,7 +284,7 @@ public class FinalProjectGroup5 {
             return;
         }
 
-        // Payment succeeded → update all related arrays for this book
+        // Save borrowing details into parallel arrays
         status[categoryIndex][bookIndex] = "Borrowed";
         borrowerName[categoryIndex][bookIndex] = borrower;
         accessType[categoryIndex][bookIndex] = access;
@@ -302,26 +297,28 @@ public class FinalProjectGroup5 {
                 + "' is now borrowed by " + borrower + ".");
     }
 
-    // ===================== PAYMENT =====================
-    // Asks the user to pay costAmount. There is a 10% chance of "system error".
-    public static boolean processPayment(int costAmount) {
+    // processPayment: asks for payment, checks amount, simulates 10% system error, returns true on success
+    static boolean processPayment(int costAmount) {
         System.out.println();
         System.out.println("Payment");
         System.out.print("Please enter payment amount (₱" + costAmount + "): ");
-
         int payment = readInt();
 
-        // If user pays less than required amount
+        // Reject negative payment amounts
+        while (payment < 0) {
+            System.out.print("Amount cannot be negative. Enter again: ");
+            payment = readInt();
+        }
+
+        // Not enough money to pay the required cost
         if (payment < costAmount) {
             System.out.println("Payment Failed: Insufficient amount!");
             System.out.println("You are short of ₱" + (costAmount - payment));
             return false;
         }
 
-        // Generate a random number from 0.0 to <1.0
+        // Random chance to simulate a system error
         double chance = Math.random();
-
-        // 90% chance of success (chance > 0.1)
         if (chance > 0.1) {
             int change = payment - costAmount;
             System.out.println("**Payment Successful!**");
@@ -330,15 +327,13 @@ public class FinalProjectGroup5 {
             }
             return true;
         } else {
-            // 10% of the time, simulate a system error
             System.out.println("Payment Failed: System Error");
-            System.out.println("Borrowing NOT Confirmed");
+            System.out.println("Borrowing NOT Confirmed. Refunded ₱" + payment);
             return false;
         }
     }
 
-    // ===================== RETURN BOOK =====================
-    // Finds a book by borrower name and marks it as available again
+    // returnBook: finds all books borrowed by a name, lets user choose which book to return, then resets its data
     static void returnBook() {
         System.out.print("\nEnter borrower's full name: ");
         String borrower = kbd.nextLine().trim();
@@ -348,46 +343,62 @@ public class FinalProjectGroup5 {
             return;
         }
 
-        int foundCategory = -1; // will hold category index of found book
-        int foundBook = -1;     // will hold book index of found book
+        // Arrays to store found borrowed books (up to 40 total)
+        int[] catIndex = new int[40];
+        int[] bookIndex = new int[40];
+        int count = 0;
 
-        // Search through all categories and books
+        // Collect all books currently borrowed by this person
         for (int c = 0; c < 4; c++) {
             for (int b = 0; b < 10; b++) {
-                // Match both status and borrower name (case-insensitive)
                 if (status[c][b].equals("Borrowed") &&
                         borrowerName[c][b].equalsIgnoreCase(borrower)) {
-                    foundCategory = c;
-                    foundBook = b;
-                    break; // break inner loop
+                    catIndex[count] = c;
+                    bookIndex[count] = b;
+                    count++;
                 }
             }
-            if (foundCategory != -1) break; // break outer loop if found
         }
 
-        // If we didn't find any matching borrowed book
-        if (foundCategory == -1) {
+        if (count == 0) {
             System.out.println("No borrowed book found under that name.");
             return;
         }
 
-        // Show which book was found
-        System.out.println("Found book: '" + bookTitles[foundCategory][foundBook] +
-                "' (Category: " + categories[foundCategory] + ")");
-        System.out.println("Return Processed:");
+        System.out.println("Borrowed books:");
+        for (int i = 0; i < count; i++) {
+            System.out.println((i + 1) + ". " + bookTitles[catIndex[i]][bookIndex[i]] +
+                    " (Category: " + categories[catIndex[i]] + ")");
+        }
+
+        // If there is more than one book, ask which one to return
+        int choice;
+        if (count == 1) {
+            choice = 1;
+        } else {
+            System.out.print("Enter which book number to return (1-" + count + "): ");
+            choice = readInt();
+            while (choice < 1 || choice > count) {
+                System.out.print("Invalid choice. Enter 1-" + count + ": ");
+                choice = readInt();
+            }
+        }
+
+        int c = catIndex[choice - 1];
+        int b = bookIndex[choice - 1];
+
+        // Reset all data for that book slot
+        status[c][b] = "Available";
+        borrowerName[c][b] = "";
+        accessType[c][b] = "";
+        daysBorrowed[c][b] = 0;
+        cost[c][b] = 0;
+
         System.out.println("Book successfully returned by " + borrower + ".");
         System.out.println("Book slot is now available.");
-
-        // Reset arrays to default values for that slot
-        status[foundCategory][foundBook] = "Available";
-        borrowerName[foundCategory][foundBook] = "";
-        accessType[foundCategory][foundBook] = "";
-        daysBorrowed[foundCategory][foundBook] = 0;
-        cost[foundCategory][foundBook] = 0;
     }
 
-    // ===================== CHECK AVAILABLE BOOKS =====================
-    // Lets user pick a category and then shows all available books in that category
+    // checkAvailableBooks: lets user pick a category and lists all books that are still "Available"
     static void checkAvailableBooks() {
         System.out.println();
         System.out.println("Select Category");
@@ -395,19 +406,18 @@ public class FinalProjectGroup5 {
             System.out.println((i + 1) + ". " + categories[i]);
         }
         System.out.print("Enter category number: ");
-        int categoryIndex = readInt() - 1;
-
-        // Validate category index
-        if (categoryIndex < 0 || categoryIndex >= categories.length) {
-            System.out.println("Invalid category.");
-            return;
+        int catChoice = readInt();
+        while (catChoice < 1 || catChoice > categories.length) {
+            System.out.print("Invalid category. Please enter 1-" + categories.length + ": ");
+            catChoice = readInt();
         }
+        int categoryIndex = catChoice - 1;
 
         System.out.println();
         System.out.println("Available " + categories[categoryIndex] + " Books:");
         boolean anyAvailable = false;
 
-        // Loop through all books in selected category
+        // Print all titles still marked as Available
         for (int i = 0; i < 10; i++) {
             if (status[categoryIndex][i].equals("Available")) {
                 anyAvailable = true;
@@ -415,14 +425,12 @@ public class FinalProjectGroup5 {
             }
         }
 
-        // If we never printed any book
         if (!anyAvailable) {
             System.out.println("No available books in this category.");
         }
     }
 
-    // ===================== SEARCH BOOKS =====================
-    // User can type full or partial name, search across all categories
+    // searchBooks: searches all titles for a case-insensitive match to a user-provided term and prints results
     static void searchBooks() {
         System.out.print("\nEnter book name (full or partial): ");
         String term = kbd.nextLine().trim();
@@ -432,17 +440,14 @@ public class FinalProjectGroup5 {
             return;
         }
 
-        // Work with lowercase to make search case-insensitive
         String lowerTerm = term.toLowerCase();
-
         System.out.println();
         System.out.println("Search Results for '" + term + "'");
         boolean found = false;
 
-        // Check every title in the 2D array
+        // Scan all titles and print details for each match
         for (int c = 0; c < 4; c++) {
             for (int b = 0; b < 10; b++) {
-                // If title contains the search term (e.g. "History" in "Ancient History")
                 if (bookTitles[c][b].toLowerCase().contains(lowerTerm)) {
                     found = true;
                     System.out.print("Book: " + bookTitles[c][b]);
@@ -461,8 +466,7 @@ public class FinalProjectGroup5 {
         }
     }
 
-    // ===================== SAFE INT INPUT =====================
-    // Reads an int from the user safely using nextLine(), to avoid Scanner bugs with mixing nextInt and nextLine
+    // readInt: reads a whole line from the user and converts it to int, re-asking on invalid input
     static int readInt() {
         while (true) {
             String line = kbd.nextLine();
